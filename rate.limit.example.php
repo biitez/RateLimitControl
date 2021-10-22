@@ -6,10 +6,10 @@ $myPDO = new PDO('mysql:host=localhost;dbname=your_db_name', 'user', 'password')
 
 $RateLimitAdapter = new RateLimit(
     Controller: "MyRateLimit", # The controller name of this rate limit
-    UniqIdenfier: "123-123-123", # Here you can enter the user's IP or in case it is after login, a token or user id
-    MaxAttempsPerHour: 10, # Maximum attempts the user must make in 1 hour to be limited
+    UniqIdenfier: "123-123-123", # Here you can enter the user's IP or in case it is after login, a token or user id (Recommended a IP Address)
+    MaxAttempsEach20Minutes: 10, # Maximum attempts the user must make in 20 minutes to be limited
     LimitationTimeOnMinutes: 15, # The time that the user will be limited in MINUTES, 15 = 15 minutes
-    pdo: $myPDO); # The connection to the database must be PDO
+    pdoConnection: $myPDO); # The connection to the database must be PDO
        
 $CheckRateLimit = $RateLimitAdapter->CheckLimit();
 
