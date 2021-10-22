@@ -10,8 +10,8 @@ class RateLimit {
     # El nombre de este controlador
     private $Controller;
 
-    # Los maximos intentos por hora en cada controlador
-    private $MAX_ATTEMPS_PER_HOUR = 10;    
+    # Los maximos intentos por cada 20 minutos en cada controlador
+    private $MAX_ATTEMPS_EACH_20_MINS = 10;    
 
     # El token que identificara el rate limiting
     private $_UserToken;
@@ -22,13 +22,13 @@ class RateLimit {
     # Tiempo de limitacion que tendra el usuario en MINUTOS
     private $LIMITATION_TIME;
 
-    function __construct($Controller, $UniqIdenfier, $MaxAttempsPerHour, $LimitationTimeOnMinutes, $pdo)
+    function __construct($Controller, $UniqIdenfier, $MaxAttempsEach20Minutes, $LimitationTimeOnMinutes, $pdoConnection)
     {
         # Se crea el controlador
         $this->Controller = $Controller;
 
         # Los intentos maximos por hora
-        $this->MAX_ATTEMPS_PER_HOUR = $MaxAttempsPerHour;
+        $this->MAX_ATTEMPS_EACH_20_MINS = $MaxAttempsEach20Minutes;
 
         # Tiempo de limitacion (EN MINUTOS) - E.g. 15 = 15 Minutes
         $this->LIMITATION_TIME = $LimitationTimeOnMinutes;
@@ -37,7 +37,7 @@ class RateLimit {
         $this->_UserToken = $UniqIdenfier;
 
         # Se le añade el parametro de la base de datos del constructor a una variable interna
-        $this->_pdo = $pdo;
+        $this->_pdo = $pdoConnection;
     }
 
     public function CheckLimit() {
@@ -122,8 +122,8 @@ class RateLimit {
         # Itera cada fila de las LOGS de la limitacion del usuario
         while ($FilaActual = $ObtenerLosUltimosIntentosPorHora->fetch()) {
 
-            # A la fecha mostrada en la base de datos (la fecha que ocurrio la insertacion) se le suma 1 HORA
-            $FechaSumando1Hora = date("Y-m-d H:i:s",strtotime($FilaActual['date_time_passing']."+ 1 hour"));
+            # A la fecha mostrada en la base de datos (la fecha que ocurrio la insertacion)
+            $FechaSumando1Hora = date("Y-m-d H:i:s",strtotime($FilaActual['date_time_passing']."+ 20 minutes"));
             
             # Se obtiene la fecha actual
             $FechaActualAComprobar = date("Y-m-d H:i:s");
@@ -144,7 +144,7 @@ class RateLimit {
         }
 
         # Si los intentos dentro de esa hora es mayor a la cantidad permitida (15 por hora)
-        if ($IntentosEnLaHora >= $this->MAX_ATTEMPS_PER_HOUR) {
+        if ($IntentosEnLaHora >= $this->MAX_ATTEMPS_EACH_20_MINS) {
 
             # Obtiene la fecha actual
             $FechaActualADatabase = date("Y-m-d H:i:s");
